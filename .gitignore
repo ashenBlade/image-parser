@@ -7,7 +7,7 @@
 *.o
 *.obj
 
-# Precompiled Headers
+# Precompiled ChunkHeaders
 *.gch
 *.pch
 
@@ -30,3 +30,6 @@
 *.exe
 *.out
 *.app
+
+cmake-build-debug
+.idea
