@@ -20,7 +20,18 @@ int main(int argc, char** argv) {
     std::cout << "Файл успешно спарсен\n\n";
 
     auto header = png.getHeaderChunk();
-    std::cout << "Размер изображения: " << header.getWidth() << "x" << header.getHeight() << " px";
+    std::cout << "Размер изображения: " << header.getWidth() << "x" << header.getHeight() << " px" << std::endl;
+
+    auto palettes = std::vector<PaletteChunk::Entry>();
+    if (png.tryGetPalettes(palettes) && !palettes.empty()) {
+        std::cout << "Палитры изображения: " << std::endl;
+        for (const auto &item: palettes) {
+            std::cout << "\tR = " << std::hex << item.r << "\tG = " << item.g << "\tB = " << item.b << std::endl;
+            std::cout << std::dec;
+        }
+    } else {
+        std::cout << "Палитр нет" << std::endl;
+    }
 
     return 0;
 }

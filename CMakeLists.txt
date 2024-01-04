@@ -4,7 +4,7 @@ project(image-parser VERSION 1.0.0)
 
 set(CMAKE_CXX_STANDARD 14)
 
-FILE(GLOB_RECURSE sources "src/*.cpp" "src/*.c")
+FILE(GLOB_RECURSE sources "src/*.cpp" "src/*.c" "src/**/*.cpp")
 
 message(STATUS "sources ${sources}")
 
