@@ -2,7 +2,6 @@
 // Created by ashblade on 04.01.24.
 //
 
-
 #include "Chunks/PaletteChunk.h"
 
 PaletteChunk::PaletteChunk(std::vector<Entry> &&entries): _entries(std::move(entries)) { }

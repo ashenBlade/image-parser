@@ -33,5 +33,13 @@ int main(int argc, char** argv) {
         std::cout << "Палитр нет" << std::endl;
     }
 
+    auto& dataChunks = png.getDataChunks();
+
+    std::cout << "Количество DATA чанков: " << dataChunks.size() << std::endl;
+    int i = 1;
+    for (const auto &dataChunk: dataChunks) {
+        std::cout << i++ << ": Размер = " << dataChunk.size() << std::endl;
+    }
+
     return 0;
 }

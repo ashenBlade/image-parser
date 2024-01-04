@@ -4,6 +4,7 @@
 
 #include "PngFile.h"
 #include "Chunks/PaletteChunk.h"
+#include "Chunks/DataChunk.h"
 
 #include <system_error>
 #include <cstring>
@@ -90,16 +91,33 @@ static std::unique_ptr<PaletteChunk> parsePaletteChunk(std::istream &input, int 
     return std::make_unique<PaletteChunk>(std::move(entries));
 }
 
+static DataChunk parseDataChunk(std::istream &input, uint32_t dataLength) {
+    auto data = std::make_unique<uint8_t[]>(dataLength);
+    input.read(reinterpret_cast<char*>(data.get()), dataLength);
+    if (!input) {
+        throw std::runtime_error("Не удалось прочитать данные чанка изображения");
+    }
+
+    skipCrc(input);
+    if (!input) {
+        throw std::runtime_error("Чтении CRC в блоке данных");
+    }
+
+    return {std::move(data), dataLength};
+}
+
 class Prefix {
 public:
     constexpr static const char Header[] = "IHDR";
     constexpr static const char Palette[] = "PLTE";
+    constexpr static const char Data[] = "IDAT";
     constexpr static const char End[] = "IEND";
 };
 
 constexpr const char Prefix::Header[];
 constexpr const char Prefix::Palette[];
 constexpr const char Prefix::End[];
+constexpr const char Prefix::Data[];
 
 PngFile PngFile::parseFile(std::istream &input) {
     // Проверяем заголовок самого файла
@@ -148,6 +166,7 @@ PngFile PngFile::parseFile(std::istream &input) {
 
     HeaderChunk header = parseHeaderChunk(input);
     std::unique_ptr<PaletteChunk> palette;
+    std::vector<DataChunk> data;
 
     skipCrc(input);
     int iter = 0;
@@ -181,6 +200,9 @@ PngFile PngFile::parseFile(std::istream &input) {
 
         if (std::strcmp(Prefix::Palette, chunkType) == 0) {
             palette = std::move(parsePaletteChunk(input, chunkLength));
+        } else if (std::strcmp(Prefix::Data, chunkType) == 0) {
+            auto dataChunk = std::move(parseDataChunk(input, chunkLength));
+            data.push_back(std::move(dataChunk));
         } else if (std::strcmp(Prefix::End, chunkType) == 0) {
             skipCrc(input);
             break;
@@ -194,7 +216,7 @@ PngFile PngFile::parseFile(std::istream &input) {
         iter++;
     }
 
-    return PngFile(header, std::move(palette));
+    return PngFile(header, std::move(palette), std::move(data));;
 }
 
 
@@ -223,9 +245,6 @@ HeaderChunk PngFile::getHeaderChunk() const {
     return _header;
 }
 
-PngFile::PngFile(HeaderChunk &header, std::unique_ptr<PaletteChunk>&& palette): _header(header), _palette(std::move(palette))
-{ }
-
 bool PngFile::tryGetPalettes(std::vector<PaletteChunk::Entry> &entries) {
     if (_palette) {
         auto count = _palette->getPalettesCount();
@@ -236,6 +255,14 @@ bool PngFile::tryGetPalettes(std::vector<PaletteChunk::Entry> &entries) {
     }
     return false;
 }
+
+const std::vector<DataChunk> &PngFile::getDataChunks() const {
+    return _dataChunks;
+}
+
+PngFile::PngFile(HeaderChunk &header, std::unique_ptr<PaletteChunk> &&palette, std::vector<DataChunk> &&dataChunks)
+    : _header(header), _palette(std::move(palette)), _dataChunks(std::move(dataChunks))
+{  }
 
 
 
