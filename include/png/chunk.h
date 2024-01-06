@@ -7,8 +7,7 @@
 
 #include <istream>
 #include <memory>
-#include "ChunkType.h"
-
+#include "chunk_type.h"
 
 class Chunk {
 protected:

@@ -2,13 +2,17 @@
 // Created by ashblade on 03.01.24.
 //
 
-#include "PngFile.h"
-#include "Chunks/PaletteChunk.h"
-#include "Chunks/DataChunk.h"
+#include "png/png_file.h"
+#include "png/chunks/palette_chunk.h"
+#include "png/chunks/data_chunk.h"
 
 #include <system_error>
 #include <cstring>
 #include <sstream>
+
+#include "zlib.h"
+#include "compression/decompressor.h"
+#include "memory/memory_streambuf.h"
 
 constexpr const int HeaderSize = 8;
 constexpr const int CrcSize = 4;
@@ -92,8 +96,8 @@ static std::unique_ptr<PaletteChunk> parsePaletteChunk(std::istream &input, int 
 }
 
 static DataChunk parseDataChunk(std::istream &input, uint32_t dataLength) {
-    auto data = std::make_unique<uint8_t[]>(dataLength);
-    input.read(reinterpret_cast<char*>(data.get()), dataLength);
+    auto data = std::make_unique<char[]>(dataLength);
+    input.read(data.get(), dataLength);
     if (!input) {
         throw std::runtime_error("Не удалось прочитать данные чанка изображения");
     }
@@ -216,7 +220,7 @@ PngFile PngFile::parseFile(std::istream &input) {
         iter++;
     }
 
-    return PngFile(header, std::move(palette), std::move(data));;
+    return PngFile(header, std::move(palette), std::move(data));
 }
 
 
@@ -263,6 +267,55 @@ const std::vector<DataChunk> &PngFile::getDataChunks() const {
 PngFile::PngFile(HeaderChunk &header, std::unique_ptr<PaletteChunk> &&palette, std::vector<DataChunk> &&dataChunks)
     : _header(header), _palette(std::move(palette)), _dataChunks(std::move(dataChunks))
 {  }
+
+
+
+static OutputMemoryStreambuf decodeDataChunk(const DataChunk &chunk, Decompressor& decompressor) {
+    InputMemoryStreambuf inBuffer(chunk.data(), chunk.size());
+    OutputMemoryStreambuf outBuffer(8192);
+    std::istream input(&inBuffer);
+    std::ostream output(&outBuffer);
+
+    decompressor.decompress(input, output);
+
+    // Теперь нужно применить сжатие
+    return outBuffer;
+}
+
+PngImage PngFile::decodeImage() const {
+    if (_dataChunks.empty()) {
+        return PngImage(std::make_unique<char[]>(0), 0);
+    }
+
+    if (_dataChunks.size() == 1) {
+        auto& chunk = _dataChunks.back();
+        Decompressor d;
+        auto x = decodeDataChunk(chunk, d);
+        auto size = x.size();
+        return PngImage(x.releaseData(), size);
+    }
+
+    std::vector<OutputMemoryStreambuf> buffers;
+    size_t resultImageSize = 0;
+    Decompressor d;
+    for (const auto &dataChunk: _dataChunks) {
+        auto decodedBuffer = decodeDataChunk(dataChunk, d);
+        resultImageSize += decodedBuffer.size();
+        buffers.push_back(std::move(decodedBuffer));
+    }
+
+    auto resultImageBytes = std::make_unique<char[]>(resultImageSize);
+    size_t currentPosition = 0;
+    auto imageBasePtr = resultImageBytes.get();
+
+    for (const auto &buffer: buffers) {
+        memcpy(imageBasePtr + currentPosition, buffer.data(), buffer.size());
+        currentPosition += buffer.size();
+    }
+
+    return PngImage(std::move(resultImageBytes), resultImageSize);
+}
+
 
 
 

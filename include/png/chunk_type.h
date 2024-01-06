@@ -2,8 +2,8 @@
 // Created by ashblade on 03.01.24.
 //
 
-#ifndef IMAGE_PARSER_CHUNKTYPE_H
-#define IMAGE_PARSER_CHUNKTYPE_H
+#ifndef IMAGE_PARSER_CHUNK_TYPE_H
+#define IMAGE_PARSER_CHUNK_TYPE_H
 
 enum class ChunkType {
     // Основные
@@ -34,4 +34,4 @@ enum class ChunkType {
     CompressedTest
 };
 
-#endif //IMAGE_PARSER_CHUNKTYPE_H
+#endif //IMAGE_PARSER_CHUNK_TYPE_H

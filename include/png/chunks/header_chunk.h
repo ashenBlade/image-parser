@@ -2,12 +2,12 @@
 // Created by ashblade on 04.01.24.
 //
 
-#ifndef IMAGE_PARSER_HEADERCHUNK_H
-#define IMAGE_PARSER_HEADERCHUNK_H
+#ifndef IMAGE_PARSER_HEADER_CHUNK_H
+#define IMAGE_PARSER_HEADER_CHUNK_H
 
-#include "Chunk.h"
-#include "CompressionMethod.h"
-#include "InterlaceType.h"
+#include "png/chunk.h"
+#include "png/compression_method.h"
+#include "png/interlace_type.h"
 
 class HeaderChunk: public Chunk {
 public:
@@ -51,4 +51,4 @@ private:
     InterlaceType _interlaceType;
 };
 
-#endif //IMAGE_PARSER_HEADERCHUNK_H
+#endif //IMAGE_PARSER_HEADER_CHUNK_H

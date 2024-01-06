@@ -2,11 +2,11 @@
 // Created by ashblade on 04.01.24.
 //
 
-#ifndef IMAGE_PARSER_PALETTECHUNK_H
-#define IMAGE_PARSER_PALETTECHUNK_H
+#ifndef IMAGE_PARSER_PALETTE_CHUNK_H
+#define IMAGE_PARSER_PALETTE_CHUNK_H
 
 #include <vector>
-#include "Chunk.h"
+#include "png/chunk.h"
 
 class PaletteChunk: public Chunk {
 public:
@@ -35,4 +35,4 @@ private:
     std::vector<Entry> _entries;
 };
 
-#endif //IMAGE_PARSER_PALETTECHUNK_H
+#endif //IMAGE_PARSER_PALETTE_CHUNK_H

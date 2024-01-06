@@ -1,13 +1,14 @@
-#ifndef IMAGE_PARSER_PNGFILE_H
-#define IMAGE_PARSER_PNGFILE_H
+#ifndef IMAGE_PARSER_PNG_FILE_H
+#define IMAGE_PARSER_PNG_FILE_H
 
 #include <iostream>
 #include <vector>
 #include <memory>
-#include "Chunk.h"
-#include "Chunks/HeaderChunk.h"
-#include "Chunks/PaletteChunk.h"
-#include "Chunks/DataChunk.h"
+#include "chunk.h"
+#include "png/chunks/header_chunk.h"
+#include "png/chunks/palette_chunk.h"
+#include "png/chunks/data_chunk.h"
+#include "png_image.h"
 
 class PngFile {
 private:
@@ -31,7 +32,9 @@ public:
     static PngFile parseFile(std::istream& input);
 
     const std::vector<DataChunk>& getDataChunks() const;
+
+    PngImage decodeImage() const;
 };
 
 
-#endif //IMAGE_PARSER_PNGFILE_H
+#endif //IMAGE_PARSER_PNG_FILE_H

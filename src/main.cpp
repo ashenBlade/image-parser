@@ -1,7 +1,7 @@
 #include <iostream>
 #include <fstream>
 
-#include "PngFile.h"
+#include "png/png_file.h"
 
 int main(int argc, char** argv) {
     if (argc != 2) {
@@ -32,6 +32,17 @@ int main(int argc, char** argv) {
     } else {
         std::cout << "Палитр нет" << std::endl;
     }
+    switch (header.getInterlaceType()) {
+        case InterlaceType::NoInterlace:
+            std::cout << "Чрезстрочная разверстка: -" << std::endl;
+            break;
+        case InterlaceType::Adam7:
+            std::cout << "Чрезстрочная разверстка: Adam7" << std::endl;
+            break;
+        default:
+            std::cout << "Чрезстрочная разверстка: неизвестно" << std::endl;
+            break;
+    }
 
     auto& dataChunks = png.getDataChunks();
 
@@ -41,5 +52,8 @@ int main(int argc, char** argv) {
         std::cout << i++ << ": Размер = " << dataChunk.size() << std::endl;
     }
 
+    auto image = png.decodeImage();
+    std::ofstream fi("output.dat", std::ios::binary);
+    fi.write(image.data(), static_cast<std::streamsize>(image.size()));
     return 0;
 }

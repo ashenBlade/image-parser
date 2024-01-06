@@ -3,7 +3,7 @@
 //
 
 #include <sstream>
-#include "Chunks/HeaderChunk.h"
+#include "png/chunks/header_chunk.h"
 
 HeaderChunk::HeaderChunk(uint32_t height, uint32_t width, uint8_t bitDepth, HeaderChunk::ColorType colorType,
                          CompressionMethod compressionMethod, InterlaceType interlaceType):
